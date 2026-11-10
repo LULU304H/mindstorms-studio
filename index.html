@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#17191d">
+<title>Mindstorms Studio</title>
+<style>
+:root{--bg:#111317;--panel:#1b1f25;--panel2:#242a32;--line:#343b45;--text:#f4f6f8;--muted:#a5afbb;--yellow:#f4c542;--blue:#58a6ff;--green:#55c58a;--red:#ff7373}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px Inter,system-ui,Arial,sans-serif}
+button,input,textarea{font:inherit}button{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 13px;border-radius:10px}
+button:hover{filter:brightness(1.15)}button.primary{background:var(--yellow);color:#171717;border-color:var(--yellow);font-weight:750}
+header{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:#171a20;position:sticky;top:0;z-index:5}
+.brand{font-size:18px;font-weight:800;letter-spacing:.2px}.brand span{color:var(--yellow)}.status{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}.dot{width:9px;height:9px;border-radius:50%;background:#8b929c;display:inline-block}.dot.connected{background:var(--green);box-shadow:0 0 10px #55c58a88}.dot.error{background:var(--red)}
+.hub-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.hub-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.meta-item{background:#14181e;border:1px solid var(--line);padding:12px;border-radius:10px}.meta-item small{display:block;color:var(--muted);margin-bottom:5px}.meta-item strong{overflow-wrap:anywhere}.log{max-height:180px;overflow:auto;background:#101318;border:1px solid var(--line);padding:10px;border-radius:9px;font:12px/1.5 ui-monospace,monospace;color:#cbd5e1}.log div{padding:2px 0}.muted{color:var(--muted)}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 64px)}
+aside{border-right:1px solid var(--line);padding:18px 12px;background:#171a20}
+.navlabel{font-size:11px;color:#87919e;text-transform:uppercase;letter-spacing:1px;padding:10px}
+.nav{width:100%;text-align:left;background:transparent;border-color:transparent;margin:3px 0}.nav.active{background:#2a2e34;border-color:#414852}.nav .ico{display:inline-block;width:27px}
+main{padding:24px;min-width:0;max-width:1500px;width:100%;margin:auto}
+h1{font-size:27px;margin:0 0 7px}h2{font-size:18px;margin:0 0 14px}.sub{color:var(--muted);margin:0 0 22px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:17px;min-width:0}.card p{color:var(--muted);font-size:13px;line-height:1.5}.big{font-size:24px;font-weight:800;margin:9px 0}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.split{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.workspace{display:grid;grid-template-columns:205px 1fr;gap:14px;min-height:540px}
+.palette,.canvas{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.block{padding:11px;margin:8px 0;border-radius:9px;color:#171717;font-weight:700;cursor:grab;user-select:none;touch-action:pan-y}
+.motion{background:#f4c542}.control{background:#58a6ff}.sensor{background:#55c58a}.display{background:#c18aff}
+.canvas{background-color:#171a20;background-image:radial-gradient(#343b45 1px,transparent 1px);background-size:20px 20px;position:relative}
+.dropzone{min-height:490px;border:1px dashed #59616d;border-radius:10px;padding:14px}
+.placed{display:flex;justify-content:space-between;align-items:center;max-width:360px;margin:8px 0;padding:12px;border-radius:9px;color:#171717;font-weight:700}
+.placed button{background:#222;color:white;padding:4px 8px}
+textarea{width:100%;min-height:390px;background:#11151a;color:#d9e4ee;border:1px solid var(--line);border-radius:10px;padding:15px;font:13px/1.6 ui-monospace,monospace;resize:vertical}
+.hidden{display:none!important}.notice{border:1px solid #725f25;background:#332d1b;color:#f6df93;padding:14px;border-radius:12px;line-height:1.5;margin:15px 0}.success{border-color:#286746;background:#172d23;color:#a8edc4}
+.field{background:#11151a;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:11px;width:100%}
+.project{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+footer{color:var(--muted);font-size:12px;margin-top:22px}
+@media(max-width:800px){.app{grid-template-columns:1fr}aside{display:flex;overflow-x:auto;padding:8px;border-right:0;border-bottom:1px solid var(--line)}.navlabel{display:none}.nav{white-space:nowrap;width:auto}.cards{grid-template-columns:1fr}.workspace{grid-template-columns:1fr}.palette{display:flex;gap:7px;overflow-x:auto}.palette h2{display:none}.block{white-space:nowrap;min-width:max-content;margin:0}.canvas{min-height:350px}main{padding:17px}header{padding:0 13px}.status .label{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">🧱 MINDSTORMS <span>STUDIO</span></div>
+  <div class="row">
+    <div class="status"><i class="dot" id="hubDot"></i><span class="label" id="hubStatus">Hub nicht verbunden</span></div>
+    <button class="primary" onclick="showPage('hub')">Hub verbinden</button>
+  </div>
+</header>
+<div class="app">
+<aside>
+  <div class="navlabel">Arbeitsbereich</div>
+  <button class="nav active" data-page="home" onclick="showPage('home')"><span class="ico">⌂</span>Startseite</button>
+  <button class="nav" data-page="blocks" onclick="showPage('blocks')"><span class="ico">▦</span>Blockprogrammierung</button>
+  <button class="nav" data-page="python" onclick="showPage('python')"><span class="ico">⌘</span>Python-Editor</button>
+  <button class="nav" data-page="hub" onclick="showPage('hub')"><span class="ico">ᛒ</span>Hub-Verbindung</button>
+  <button class="nav" data-page="control" onclick="showPage('control')"><span class="ico">◉</span>Live-Steuerung</button>
+  <button class="nav" data-page="projects" onclick="showPage('projects')"><span class="ico">▤</span>Projekte</button>
+</aside>
+<main>
+<section id="home">
+  <h1>Willkommen bei Mindstorms Studio</h1><p class="sub">Deine Entwicklungsumgebung für LEGO MINDSTORMS Robot Inventor (51515).</p>
+  <div class="cards">
+    <div class="card"><div>🧩</div><div class="big">Blockeditor</div><p>Erstelle Programme mit visuellen Bausteinen.</p><button onclick="showPage('blocks')">Programmieren →</button></div>
+    <div class="card"><div>⌨️</div><div class="big">Python</div><p>Schreibe und bearbeite Python-Code für deinen Roboter.</p><button onclick="showPage('python')">Editor öffnen →</button></div>
+    <div class="card"><div>🔵</div><div class="big">Hub-Verbindung</div><p>Prüfe die Verbindungsmöglichkeiten zu deinem Hub.</p><button onclick="showPage('hub')">Verbindung prüfen →</button></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h2>Aktuelles Projekt</h2><input id="projectName" class="field" value="Mein erstes Roboterprojekt" aria-label="Projektname"><div class="row" style="margin-top:12px"><button class="primary" onclick="saveProject()">Projekt speichern</button><button onclick="showPage('blocks')">Editor öffnen</button></div></div>
+</section>
+<section id="blocks" class="hidden">
+  <div class="split"><div><h1>Blockprogrammierung</h1><p class="sub">Ziehe Blöcke in die Arbeitsfläche oder tippe sie an.</p></div><button class="primary" onclick="makePython()">Python erzeugen ↓</button></div>
+  <div class="workspace">
+    <div class="palette"><h2>Blöcke</h2><div>
+      <div class="block motion" draggable="true" data-code="motor.run(50)">⚙ Motor starten</div>
+      <div class="block motion" draggable="true" data-code="motor.stop()">■ Motor stoppen</div>
+      <div class="block control" draggable="true" data-code="await runloop.sleep_ms(1000)">◷ Warte 1 Sekunde</div>
+      <div class="block control" draggable="true" data-code="for i in range(10):">↻ Wiederhole 10-mal</div>
+      <div class="block sensor" draggable="true" data-code="# Sensorwert lesen">◉ Sensorwert lesen</div>
+      <div class="block display" draggable="true" data-code="# Hub-Anzeige steuern">▣ Hub-Anzeige</div>
+    </div></div>
+    <div class="canvas"><div class="split"><strong>Arbeitsfläche</strong><button onclick="clearBlocks()">Leeren</button></div><div id="dropzone" class="dropzone"><p style="color:var(--muted)">Blöcke hier ablegen …</p></div></div>
+  </div>
+  <p class="sub" style="margin-top:12px">Hinweis: Die Beispielblöcke sind derzeit ein UI-Prototyp. Für ausführbaren Hub-Code müssen die passenden Robot-Inventor-APIs und Anschlüsse konfiguriert werden.</p>
+</section>
+<section id="python" class="hidden">
+  <h1>Python-Editor</h1><p class="sub">Bearbeite deinen Programmcode. Die konkrete Hub-Laufzeit muss vor der Übertragung geprüft werden.</p>
+  <textarea id="pythonCode" spellcheck="false"># LEGO MINDSTORMS Robot Inventor
+# Beispielgerüst – noch nicht auf den Hub übertragen
+
+async def main():
+    # Hier dein Roboterprogramm ergänzen
+    pass
+</textarea>
+  <div class="row" style="margin-top:12px"><button class="primary" onclick="downloadCode()">Python-Datei herunterladen</button><button onclick="copyCode()">Code kopieren</button></div>
+  <div class="notice">Der Editor speichert und exportiert Code. Eine direkte Übertragung an den Hub ist erst nach Implementierung und Test der nativen Bluetooth-Verbindung verfügbar.</div>
+</section>
+<section id="hub" class="hidden">
+  <h1>LEGO Hub verbinden</h1><p class="sub">Echte Bluetooth-LE-Verbindung zum LEGO MINDSTORMS Robot Inventor Hub (51515).</p>
+  <div class="card">
+    <div class="split"><div><strong>Robot Inventor Hub</strong><p id="hubDetail">Noch keine Hardwareverbindung hergestellt.</p></div><span style="font-size:32px">🧱</span></div>
+    <div id="platformNotice" class="notice">Android: Öffne diese Seite in Google Chrome über eine HTTPS-Adresse. Aktiviere Bluetooth und schalte den Hub ein.</div>
+    <div class="hub-actions">
+      <button id="connectButton" class="primary" onclick="connectHub()">Bluetooth-Hub suchen</button>
+      <button id="disconnectButton" onclick="disconnectHub()" disabled>Trennen</button>
+    </div>
+    <div class="hub-meta">
+      <div class="meta-item"><small>Gerätename</small><strong id="hubName">—</strong></div>
+      <div class="meta-item"><small>GATT-Verbindung</small><strong id="gattStatus">Nicht verbunden</strong></div>
+      <div class="meta-item"><small>LEGO-Dienst</small><strong id="serviceStatus">Nicht geprüft</strong></div>
+      <div class="meta-item"><small>LEGO-Kanal</small><strong id="characteristicStatus">Nicht geprüft</strong></div>
+    </div>
+    <p id="hubError" class="muted" role="status" aria-live="polite">Noch kein Verbindungsversuch.</p>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2>Verbindungsprotokoll</h2>
+    <div id="hubLog" class="log" aria-live="polite"><div>Bereit. Noch keine Bluetooth-Aktion ausgeführt.</div></div>
+  </div>
+  <div class="notice">Diese erste Ausbaustufe prüft die echte Bluetooth-Verbindung und findet den LEGO-LWP3-Dienst samt Kommunikationskanal. Programmübertragung, Motorbefehle und Sensorwerte sind noch nicht implementiert und werden ausdrücklich nicht als verfügbar angezeigt.</div>
+</section>
+<section id="control" class="hidden">
+  <h1>Live-Steuerung</h1><p class="sub">Bedienoberfläche für die spätere direkte Hub-Steuerung.</p>
+  <div class="notice">Die Hardware ist noch nicht verbunden. Die folgenden Steuerungen werden erst aktiv, wenn die native Bluetooth-Verbindung implementiert und getestet wurde.</div>
+  <div class="cards">
+    <div class="card"><h2>Motor A</h2><input type="range" min="-100" max="100" value="0" disabled style="width:100%"><p>Geschwindigkeit: nicht verfügbar</p><button disabled>Stop</button></div>
+    <div class="card"><h2>Motor B</h2><input type="range" min="-100" max="100" value="0" disabled style="width:100%"><p>Geschwindigkeit: nicht verfügbar</p><button disabled>Stop</button></div>
+    <div class="card"><h2>Sensoren</h2><p>Keine Sensordaten empfangen.</p></div>
+  </div>
+</section>
+<section id="projects" class="hidden">
+  <h1>Projekte</h1><p class="sub">Projekte werden in diesem Browser lokal gespeichert.</p>
+  <div class="card"><div class="row"><input id="newProject" class="field" placeholder="Projektname"><button class="primary" onclick="saveProject()">Speichern</button></div><div id="projectList" style="margin-top:14px"></div></div>
+</section>
+<footer>Mindstorms Studio · unabhängiges Community-Projekt · Nicht von LEGO® gesponsert oder unterstützt.</footer>
+</main>
+</div>
+<script>
+// LEGO Wireless Protocol v3 (LWP3) – Robot Inventor Hub 51515
+const LWP3_SERVICE_UUID = '00001623-1212-efde-1623-785feabcd123';
+const LWP3_CHARACTERISTIC_UUID = '00001624-1212-efde-1623-785feabcd123';
+const DEVICE_INFO_SERVICE_UUID = '0000180a-0000-1000-8000-00805f9b34fb';
+let selectedHub = null;
+let hubCharacteristic = null;
+let blocks=[];
+
+function hubLog(message){const log=document.getElementById('hubLog');if(!log)return;const line=document.createElement('div');line.textContent=new Date().toLocaleTimeString('de-DE')+' · '+message;log.appendChild(line);log.scrollTop=log.scrollHeight;}
+function setHubUi(state,message=''){
+  const dot=document.getElementById('hubDot');const top=document.getElementById('hubStatus');const detail=document.getElementById('hubDetail');
+  dot.classList.toggle('connected',state==='connected');dot.classList.toggle('error',state==='error');
+  top.textContent=state==='connected'?'Hub verbunden':state==='error'?'Verbindungsfehler':'Hub nicht verbunden';
+  if(detail)detail.textContent=message|| (state==='connected'?'Bluetooth-Verbindung und LEGO-Kommunikationskanal wurden gefunden.':'Noch keine Hardwareverbindung hergestellt.');
+  document.getElementById('gattStatus').textContent=state==='connected'?'Verbunden':state==='connecting'?'Verbindung läuft …':'Nicht verbunden';
+  document.getElementById('connectButton').disabled=state==='connecting'||state==='connected';
+  document.getElementById('disconnectButton').disabled=state!=='connected';
+}
+function bluetoothErrorMessage(error){
+  if(error?.name==='NotFoundError')return 'Kein Hub ausgewählt. Prüfe, ob der Hub eingeschaltet ist und nicht bereits von einem anderen Gerät verwendet wird.';
+  if(error?.name==='NotAllowedError')return 'Bluetooth-Berechtigung verweigert oder Auswahl abgebrochen. Erlaube Chrome den Zugriff auf Bluetooth und versuche es erneut.';
+  if(error?.name==='SecurityError')return 'Bluetooth ist hier aus Sicherheitsgründen gesperrt. Öffne die Anwendung über HTTPS in Chrome.';
+  if(error?.name==='NetworkError')return 'Bluetooth-Verbindung fehlgeschlagen. Schalte den Hub aus und wieder ein, schließe die LEGO-App auf anderen Geräten und versuche es erneut.';
+  return (error?.message||String(error)||'Unbekannter Bluetooth-Fehler');
+}
+async function connectHub(){
+  const errorEl=document.getElementById('hubError');
+  if(!window.isSecureContext){errorEl.textContent='Unsichere Adresse: Web Bluetooth funktioniert nur über HTTPS (oder localhost). Eine lokal geöffnete HTML-Datei reicht nicht.';hubLog('Abbruch: keine sichere HTTPS-Verbindung.');setHubUi('error');return;}
+  if(!navigator.bluetooth){errorEl.textContent='Dieser Browser bietet Web Bluetooth nicht an. Bitte die aktuelle Google-Chrome-Version auf Android verwenden; nicht in einem In-App-Browser öffnen.';hubLog('Web Bluetooth API nicht verfügbar.');setHubUi('error');return;}
+  if(!navigator.bluetooth.requestDevice){errorEl.textContent='Bluetooth-Gerätesuche wird von diesem Browser nicht unterstützt.';setHubUi('error');return;}
+  try{
+    errorEl.textContent='Bluetooth-Geräteauswahl wird geöffnet …';setHubUi('connecting');hubLog('Suche nach LEGO-Hubs mit LWP3-Dienst …');
+    const device=await navigator.bluetooth.requestDevice({filters:[{services:[LWP3_SERVICE_UUID]}],optionalServices:[DEVICE_INFO_SERVICE_UUID]});
+    selectedHub=device;document.getElementById('hubName').textContent=device.name||'LEGO Hub (Name nicht übertragen)';
+    device.removeEventListener('gattserverdisconnected',onHubDisconnected);
+    device.addEventListener('gattserverdisconnected',onHubDisconnected);
+    hubLog('Hub ausgewählt: '+(device.name||'Unbenannt'));
+    errorEl.textContent='Verbinde mit '+(device.name||'LEGO Hub')+' …';
+    const server=await device.gatt.connect();
+    if(!server.connected)throw new Error('Der Browser meldet keine aktive GATT-Verbindung.');
+    document.getElementById('gattStatus').textContent='Verbunden';hubLog('Bluetooth-GATT-Verbindung hergestellt.');
+    const service=await server.getPrimaryService(LWP3_SERVICE_UUID);
+    document.getElementById('serviceStatus').textContent='Gefunden';hubLog('LEGO-LWP3-Dienst gefunden.');
+    hubCharacteristic=await service.getCharacteristic(LWP3_CHARACTERISTIC_UUID);
+    document.getElementById('characteristicStatus').textContent='Gefunden';
+    const props=hubCharacteristic.properties;
+    hubLog('LEGO-Kommunikationskanal gefunden ('+[props.read?'Lesen':'',props.write?'Schreiben':'',props.writeWithoutResponse?'Schreiben ohne Antwort':'',props.notify?'Benachrichtigungen':''].filter(Boolean).join(', ')+').');
+    if(props.notify){
+      try{await hubCharacteristic.startNotifications();hubCharacteristic.addEventListener('characteristicvaluechanged',onHubData);hubLog('Benachrichtigungen aktiviert.');}
+      catch(notificationError){hubLog('Hinweis: Benachrichtigungen konnten nicht aktiviert werden: '+notificationError.message);}
+    }
+    setHubUi('connected', 'Echte Bluetooth-Verbindung aktiv. LEGO-LWP3-Dienst und Kommunikationskanal gefunden.');
+    errorEl.textContent='Verbindung erfolgreich geprüft. Noch keine Motor- oder Programmsteuerung aktiviert.';
+  }catch(error){
+    const message=bluetoothErrorMessage(error);errorEl.textContent=message;hubLog('Fehler: '+message);
+    if(selectedHub?.gatt?.connected)selectedHub.gatt.disconnect();
+    if(error?.name==='NotFoundError')setHubUi('idle');else setHubUi('error');
+    document.getElementById('serviceStatus').textContent='Nicht geprüft';document.getElementById('characteristicStatus').textContent='Nicht geprüft';
+  }
+}
+function onHubData(event){const value=event.target.value;const bytes=Array.from(new Uint8Array(value.buffer,value.byteOffset,value.byteLength));hubLog('LWP3-Daten empfangen: '+bytes.map(v=>v.toString(16).padStart(2,'0')).join(' '));}
+function onHubDisconnected(){hubCharacteristic=null;document.getElementById('serviceStatus').textContent='Nicht verbunden';document.getElementById('characteristicStatus').textContent='Nicht verbunden';setHubUi('idle','Bluetooth-Verbindung wurde getrennt.');document.getElementById('hubError').textContent='Verbindung getrennt. Du kannst den Hub erneut verbinden.';hubLog('Hub-Verbindung getrennt.');}
+function disconnectHub(){if(selectedHub?.gatt?.connected){selectedHub.gatt.disconnect();}else{onHubDisconnected();}}
+function explainConnect(){showPage('hub');hubLog('Hinweis: Android Chrome benötigt HTTPS, aktiviertes Bluetooth und einen eingeschalteten Hub.');}
+
+function showPage(id){document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));}
+function renderBlocks(){const z=document.getElementById('dropzone');z.innerHTML='';if(!blocks.length){z.innerHTML='<p style="color:var(--muted)">Blöcke hier ablegen …</p>';return;}blocks.forEach((b,i)=>{const d=document.createElement('div');d.className='placed';d.style.background=b.color;d.innerHTML='<span></span><button aria-label="Block löschen">×</button>';d.querySelector('span').textContent=b.label;d.querySelector('button').onclick=()=>{blocks.splice(i,1);renderBlocks()};z.appendChild(d)});}
+document.querySelectorAll('.block').forEach(b=>{b.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',b.dataset.code));b.addEventListener('click',()=>addBlock(b));});
+const zone=document.getElementById('dropzone');zone.addEventListener('dragover',e=>e.preventDefault());zone.addEventListener('drop',e=>{e.preventDefault();const code=e.dataTransfer.getData('text/plain');const b=[...document.querySelectorAll('.block')].find(x=>x.dataset.code===code);if(b)addBlock(b)});
+function addBlock(b){blocks.push({label:b.textContent.trim(),code:b.dataset.code,color:getComputedStyle(b).backgroundColor});renderBlocks();}
+function clearBlocks(){blocks=[];renderBlocks()}
+function makePython(){document.getElementById('pythonCode').value='# Generierter Beispielcode\n# Vor dem Einsatz mit der Robot-Inventor-Laufzeit/API abgleichen.\n\nasync def main():\n'+blocks.map(b=>'    '+b.code).join('\n')+'\n    pass\n';showPage('python')}
+function downloadCode(){const blob=new Blob([document.getElementById('pythonCode').value],{type:'text/x-python'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='robot_program.py';a.click();URL.revokeObjectURL(a.href)}
+async function copyCode(){try{await navigator.clipboard.writeText(document.getElementById('pythonCode').value);alert('Code kopiert.')}catch(e){alert('Kopieren nicht möglich; bitte manuell markieren.')}}
+function saveProject(){const name=(document.getElementById('newProject')?.value||document.getElementById('projectName')?.value||'Mein Projekt').trim();let list=JSON.parse(localStorage.getItem('mindstormsProjects')||'[]');list.push({name,blocks,code:document.getElementById('pythonCode').value,date:new Date().toLocaleString('de-DE')});localStorage.setItem('mindstormsProjects',JSON.stringify(list));renderProjects();alert('Projekt lokal gespeichert.')}
+function renderProjects(){const el=document.getElementById('projectList');if(!el)return;const list=JSON.parse(localStorage.getItem('mindstormsProjects')||'[]');el.innerHTML=list.length?'':'<p class="sub">Noch keine gespeicherten Projekte.</p>';list.forEach((p,i)=>{const d=document.createElement('div');d.className='project';const t=document.createElement('span');t.textContent=p.name+' · '+p.date;const b=document.createElement('button');b.textContent='Laden';b.onclick=()=>{blocks=p.blocks||[];document.getElementById('pythonCode').value=p.code||'';renderBlocks();showPage('blocks')};d.append(t,b);el.appendChild(d)})}
+function explainConnect(){alert('Für direkte iPad-Bluetooth-Verbindung benötigen wir eine native iPad-App (Swift/CoreBluetooth), die mit dieser Weboberfläche kommuniziert. Die Website allein kann das in iPadOS Safari nicht zuverlässig leisten.');}
+renderProjects();
+if(!navigator.bluetooth){document.getElementById('platformNotice').textContent='Web Bluetooth wird in diesem Browser nicht unterstützt. Verwende Google Chrome auf Android und öffne die Seite über HTTPS.';}else if(!window.isSecureContext){document.getElementById('platformNotice').textContent='Diese Seite ist nicht über HTTPS geöffnet. Für Bluetooth muss sie über eine sichere HTTPS-Adresse geladen werden.';}
+</script>
+</body>
+</html>
